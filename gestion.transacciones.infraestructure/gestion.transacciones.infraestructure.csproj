@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\gestion.transacciones.application\gestion.transacciones.application.csproj" />
     <ProjectReference Include="..\gestion.transacciones.domain\gestion.transacciones.domain.csproj" />
   </ItemGroup>
 

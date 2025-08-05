@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using gestion.productos.application.Interfaces;
+using gestion.productos.infraestructure.Repositories;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace gestion.productos.infraestructure.ioc
@@ -7,6 +9,8 @@ namespace gestion.productos.infraestructure.ioc
     {
         public static IServiceCollection AddInfraestructure(this IServiceCollection services, IConfiguration configuration)
         {
+
+            services.AddScoped<IProductos, ProductoRepository>();
             return services;
         }
     }

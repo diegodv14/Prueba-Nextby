@@ -58,7 +58,8 @@ public partial class InventarioContext : DbContext
                 .HasDefaultValueSql("uuid_generate_v4()")
                 .HasColumnName("id");
             entity.Property(e => e.TipoTransaccion)
-              .HasColumnType("tipo_transaccion");
+              .HasColumnType("tipo_transaccion")
+              .HasColumnName("tipo_transaccion");
             entity.Property(e => e.Cantidad).HasColumnName("cantidad");
             entity.Property(e => e.Detalle).HasColumnName("detalle");
             entity.Property(e => e.Fecha)

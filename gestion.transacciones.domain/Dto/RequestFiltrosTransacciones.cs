@@ -6,6 +6,6 @@ namespace gestion.transacciones.domain.Dto
     {
         public DateTime? fecha { get; set; }
         public TipoTransaccion? tipo { get; set; }
-        public string productoId { get; set; }
+        public string? productoId { get; set; }
     }
 }

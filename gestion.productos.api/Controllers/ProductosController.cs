@@ -37,13 +37,13 @@ namespace gestion.productos.api.Controllers
             return new SuccessResponse<Producto>(res, "Producto creado exitosamente", 201);
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(SuccessResponse<Producto>), 200)]
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         [ProducesResponseType(typeof(ErrorResponse), 500)]
         [ProducesResponseType(typeof(ErrorResponse), 404)]
-        public async Task<SuccessResponse<Producto>> ObtenerProductoPorId([FromQuery] string id)
+        public async Task<SuccessResponse<Producto>> ObtenerProductoPorId(string id)
         {
             var res = await _repository.GetProductoById(Guid.Parse(id));
             return new SuccessResponse<Producto>(res, $"Producto obtenido por id {id} exitosamente", 200);

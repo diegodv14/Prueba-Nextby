@@ -29,7 +29,7 @@ namespace gestion.transacciones.infraestructure.Repositories
 
                 // Obtener el producto
                 var urlProducto = _config.GetConnectionString("producto_service") ?? throw new BaseCustomException("La uri del microservicio de productos no esta configurada", 500);
-                var res = await _httpClient.GetAsync($"{urlProducto}/api/Productos/ObtenerProductoPorId?id={data.ProductoId}");
+                var res = await _httpClient.GetAsync($"{urlProducto}/api/Productos/{data.ProductoId}");
                 var content = await res.Content.ReadAsStringAsync();
                 var json = JsonSerializer.Deserialize<SuccessResponse<Producto>>(content);
 
@@ -67,7 +67,7 @@ namespace gestion.transacciones.infraestructure.Repositories
                 }
                 var jsonActualizarProducto = JsonSerializer.Serialize(request);
                 var contentActualizarProducto = new StringContent(jsonActualizarProducto, Encoding.UTF8, "application/json");
-                var resActualizarProducto = await _httpClient.PutAsync($"{urlProducto}/api/Productos/EditarProducto?id={data.ProductoId}", contentActualizarProducto);
+                var resActualizarProducto = await _httpClient.PutAsync($"{urlProducto}/api/Productos?id={data.ProductoId}", contentActualizarProducto);
                 resActualizarProducto.EnsureSuccessStatusCode();
 
                 var newTransaccion = new Transaccione()
@@ -114,7 +114,7 @@ namespace gestion.transacciones.infraestructure.Repositories
                 var urlProducto = _config.GetConnectionString("producto_service") ?? throw new BaseCustomException("La uri del microservicio de productos no esta configurada",500);
                 var json = JsonSerializer.Serialize(request);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var res = await _httpClient.PutAsync($"{urlProducto}/api/Productos/EditarProducto?id={transaccion.ProductoId}", content);
+                var res = await _httpClient.PutAsync($"{urlProducto}/api/Productos?id={transaccion.ProductoId}", content);
                 res.EnsureSuccessStatusCode();  
 
                 _context.Transacciones.Remove(transaccion);
@@ -193,7 +193,7 @@ namespace gestion.transacciones.infraestructure.Repositories
                 var jsonActualizar = JsonSerializer.Serialize(requestProducto);
                 var contentActualizar = new StringContent(jsonActualizar, Encoding.UTF8, "application/json");
 
-                var resActualizar = await _httpClient.PutAsync($"{urlProducto}/api/Productos/EditarProducto?id={transaccion.ProductoId}", contentActualizar);
+                var resActualizar = await _httpClient.PutAsync($"{urlProducto}/api/Productos?id={transaccion.ProductoId}", contentActualizar);
                 resActualizar.EnsureSuccessStatusCode();
                 transaccion.Cantidad = data.Cantidad;
                 transaccion.Detalle = data.Detalle;

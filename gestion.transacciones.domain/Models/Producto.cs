@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace gestion.transacciones.domain.Models;
+﻿namespace gestion.transacciones.domain.Models;
 
 public partial class Producto
 {

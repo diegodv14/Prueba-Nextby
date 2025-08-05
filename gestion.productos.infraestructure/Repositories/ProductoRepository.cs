@@ -82,16 +82,30 @@ namespace gestion.productos.infraestructure.Repositories
         {
             try
             {
-                var producto = await _context.Productos.FindAsync(id) ?? throw new BaseCustomException($"El producto con id {id} no existe", 404);
-                producto.Nombre = productoDto.Nombre;
-                producto.Descripcion = productoDto.Descripcion;
-                producto.Categoria = productoDto.Categoria;
-                producto.Imagen = productoDto.Imagen;
-                producto.Precio = productoDto.Precio;
-                producto.Stock = productoDto.Stock;
+                var producto = await _context.Productos.FindAsync(id)
+                    ?? throw new BaseCustomException($"El producto con id {id} no existe", 404);
+
+                if (!string.IsNullOrEmpty(productoDto.Nombre))
+                    producto.Nombre = productoDto.Nombre;
+
+                if (!string.IsNullOrEmpty(productoDto.Descripcion))
+                    producto.Descripcion = productoDto.Descripcion;
+
+                if (!string.IsNullOrEmpty(productoDto.Categoria))
+                    producto.Categoria = productoDto.Categoria;
+
+                if (!string.IsNullOrEmpty(productoDto.Imagen))
+                    producto.Imagen = productoDto.Imagen;
+
+                if (productoDto.Precio.HasValue)
+                    producto.Precio = productoDto.Precio;
+
+                if (productoDto.Stock.HasValue)
+                    producto.Stock = productoDto.Stock;
 
                 _context.Productos.Update(producto);
                 await _context.SaveChangesAsync();
+
                 return producto;
             }
             catch

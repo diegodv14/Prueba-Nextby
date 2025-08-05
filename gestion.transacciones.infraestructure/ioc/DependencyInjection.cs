@@ -14,6 +14,7 @@ namespace gestion.transacciones.infraestructure.ioc
             services.AddDbContext<InventarioContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("db"))
             );
+            services.AddHttpClient();
             services.AddScoped<ITransacciones, TransaccionesRepository>();
             return services;
         }

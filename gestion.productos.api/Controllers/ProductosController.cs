@@ -62,6 +62,7 @@ namespace gestion.productos.api.Controllers
         }
 
         [HttpDelete]
+        [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(SuccessResponse<bool>), 204)]
         [ProducesResponseType(typeof(ErrorResponse), 400)]

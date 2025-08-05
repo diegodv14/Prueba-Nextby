@@ -20,9 +20,9 @@ namespace gestion.transacciones.api.Controllers
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         [ProducesResponseType(typeof(ErrorResponse), 500)]
         [ProducesResponseType(typeof(ErrorResponse), 404)]
-        public async Task<SuccessResponse<List<Transaccione>>> ListarTransacciones()
+        public async Task<SuccessResponse<List<Transaccione>>> ListarTransacciones([FromQuery] RequestFiltrosTransacciones filtros)
         {
-            var res = await _repository.GetTransacciones();
+            var res = await _repository.GetTransacciones(filtros);
             return new SuccessResponse<List<Transaccione>>(res, "Lista de Transacciones devuelta exitosamente", 200);
         }
 
@@ -33,7 +33,7 @@ namespace gestion.transacciones.api.Controllers
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         [ProducesResponseType(typeof(ErrorResponse), 500)]
         [ProducesResponseType(typeof(ErrorResponse), 404)]
-        public async Task<SuccessResponse<Transaccione>> RegistrarTransaccion([FromRoute] TipoTransaccion tipoTransaccion, RequestTransaccionDto data)
+        public async Task<SuccessResponse<Transaccione>> RegistrarTransaccion([FromRoute] TipoTransaccion tipoTransaccion, [FromBody] RequestTransaccionDto data)
         {
             var res = await _repository.AddTransaccion(tipoTransaccion, data);
             return new SuccessResponse<Transaccione>(res, $"Transacción de {tipoTransaccion} creada exitosamente", 201);
@@ -58,7 +58,7 @@ namespace gestion.transacciones.api.Controllers
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         [ProducesResponseType(typeof(ErrorResponse), 500)]
         [ProducesResponseType(typeof(ErrorResponse), 404)]
-        public async Task<SuccessResponse<bool>> EliminarTransaccion(string id)
+        public async Task<SuccessResponse<bool>> EliminarTransaccion([FromQuery] string id)
         {
             bool res = await _repository.DeleteTransaccion(Guid.Parse(id));
             return new SuccessResponse<bool>(res, "Transacción eliminada exitosamente", 204);

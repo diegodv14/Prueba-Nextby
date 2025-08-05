@@ -16,5 +16,5 @@ public partial class Producto
 
     public int? Stock { get; set; }
 
-    public virtual ICollection<Transaccione> Transacciones { get; set; } = new List<Transaccione>();
+    public virtual ICollection<Transaccione>? Transacciones { get; set; } = null!;
 }

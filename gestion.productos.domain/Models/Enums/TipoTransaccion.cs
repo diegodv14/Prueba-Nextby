@@ -2,7 +2,7 @@
 {
     public enum TipoTransaccion
     {
-        Compra,
-        Venta
+        compra,
+        venta
     }
 }

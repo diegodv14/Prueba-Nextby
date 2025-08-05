@@ -20,5 +20,5 @@ public partial class Transaccione
 
     public string? Detalle { get; set; }
 
-    public virtual Producto? Producto { get; set; }
+    public virtual Producto? Producto { get; set; } = null!;
 }

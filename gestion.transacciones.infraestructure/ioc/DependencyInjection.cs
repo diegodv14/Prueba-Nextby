@@ -2,6 +2,8 @@
 using gestion.transacciones.infraestructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using gestion.transacciones.domain.Models;
 
 namespace gestion.transacciones.infraestructure.ioc
 {
@@ -9,6 +11,9 @@ namespace gestion.transacciones.infraestructure.ioc
     {
         public static IServiceCollection AddInfraestructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddDbContext<InventarioContext>(options =>
+                options.UseNpgsql(configuration.GetConnectionString("db"))
+            );
             services.AddScoped<ITransacciones, TransaccionesRepository>();
             return services;
         }

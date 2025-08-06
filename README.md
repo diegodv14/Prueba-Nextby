@@ -40,4 +40,6 @@ Cada microservicio expone su propia interfaz Swagger para facilitar el consumo d
 
 Ahí puedes probar las operaciones CRUD de cada uno directamente desde Swagger UI.
 
-Nota: Para los endpoints relacionados con transacciónes hay ciertos parametros llamados tipo, este parametro hace referencia al tipo de transacción y solo puede ser "compra" o "venta" en formato string.
+## Notas
+1. Para los endpoints relacionados con transacciones hay un parametro llamados tipo, este parametro hace referencia al tipo de transacción y solo puede ser "compra" o "venta" en formato string.
+2. El campo de la cantidad del producto es un int en la db, si se intentan realizar pruebas con valores numericos superiores al rango del tipo de dato int (2,147,483,647) puede inconsistencias en las APIS

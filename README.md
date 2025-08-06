@@ -27,7 +27,7 @@ Como base de datos se utiliza **PostgreSQL**.
 docker-compose up -d
 ```
 
-Este comando inicia el contenedor de PostgreSQL y automáticamente ejecuta un archivo `init.sql` que se encuentra en la misma carpeta. Asegúrate de no mover ese archivo para que la inicialización funcione correctamente.
+Este comando inicia el contenedor de PostgreSQL y automáticamente ejecuta un archivo `init.sql` que se encuentra en la misma carpeta.
 
 4. Una vez levantada la base de datos, simplemente corre ambos microservicios desde la solución.
 
@@ -39,3 +39,7 @@ Cada microservicio expone su propia interfaz Swagger para facilitar el consumo d
 - **Transacciones**: `http://localhost:puerto_transacciones/swagger/index.html`
 
 Ahí puedes probar las operaciones CRUD de cada uno directamente desde Swagger UI.
+
+## Notas
+1. Para los endpoints relacionados con transacciones hay un parametro llamados tipo, este parametro hace referencia al tipo de transacción y solo puede ser "compra" o "venta" en formato string.
+2. El campo de la cantidad del producto es un int en la db, si se intentan realizar pruebas con valores numericos superiores al rango del tipo de dato int (2,147,483,647) puede inconsistencias en las APIS

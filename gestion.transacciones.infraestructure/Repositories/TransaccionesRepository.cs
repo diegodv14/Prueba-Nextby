@@ -5,6 +5,7 @@ using gestion.transacciones.domain.Dto;
 using gestion.transacciones.domain.exceptions;
 using gestion.transacciones.domain.Models;
 using gestion.transacciones.domain.Models.Enums;
+using gestion.transacciones.domain.response;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Text;
@@ -17,9 +18,14 @@ namespace gestion.transacciones.infraestructure.Repositories
         private readonly InventarioContext _context = db;
         private readonly HttpClient _httpClient = httpClient;
         private readonly IConfiguration _config = config;
+        private readonly JsonSerializerOptions _options = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
 
 
-        // La logica referente a los productos se puede realizar en la misma función pero para simular un ambiente de microservicios empleare el otro microservicio de producto.
+        // La logica referente a los productos se puede realizar en la misma función pues estamos conectados a la misma db
+        // pero para simular un ambiente de microservicios empleare el otro microservicio de producto.
 
         public async Task<Transaccione> AddTransaccion(TipoTransaccion tipo, RequestTransaccionDto data)
         {
@@ -31,44 +37,72 @@ namespace gestion.transacciones.infraestructure.Repositories
                 var urlProducto = _config.GetConnectionString("producto_service") ?? throw new BaseCustomException("La uri del microservicio de productos no esta configurada", 500);
                 var res = await _httpClient.GetAsync($"{urlProducto}/api/Productos/{data.ProductoId}");
                 var content = await res.Content.ReadAsStringAsync();
-                var json = JsonSerializer.Deserialize<SuccessResponse<Producto>>(content);
-
-
-                if (json == null || json.Status == 500)
+                Producto producto;
+                if (res.IsSuccessStatusCode)
                 {
-                    throw new BaseCustomException($"Hubo un error al verificar la existencia del producto con id {data.ProductoId}", 500);
-                }
-                if (json.Status == 404)
-                {
-                    throw new BaseCustomException($"El producto con id {data.ProductoId} no existe", 404);
-                }
+                    var success = JsonSerializer.Deserialize<SuccessResponse<Producto>>(content, _options);
 
-                var producto = json.Data;
+                    if (success == null || success.Data == null)
+                    {
+                        throw new BaseCustomException("La respuesta no contiene datos del producto", 500);
+                    }
+
+                    producto = success.Data;
+                }
+                else
+                {
+                    var error = JsonSerializer.Deserialize<ErrorResponse>(content, _options);
+
+                    if (error == null || error.Code == 404)
+                    {
+                        throw new BaseCustomException($"El producto con id {data.ProductoId} no existe", 404);
+                    }
+
+                    if (error == null || error.Code == 500)
+                    {
+                        throw new BaseCustomException($"Hubo un error al verificar la existencia del producto con id {data.ProductoId}", 500);
+                    }
+
+                    throw new BaseCustomException(error.Message ?? "Error interno al verificar el producto", error.Code);
+                }
 
                 var request = new RequestProductoDto();
 
                 // Realizar actualización del producto en base del tipo de transacción
-                switch (tipo)
+                var nuevoStock = tipo switch
                 {
-                    case TipoTransaccion.compra:
-                        {
-                            request.Stock = producto!.Stock + data.Cantidad;
-                            break;
-                        }
-                    case TipoTransaccion.venta:
-                        {
-                            request.Stock = producto!.Stock - data.Cantidad;   
-                            break;
-                        }
-                    default:
-                        {
-                            throw new BaseCustomException("Tipo de transacción no válido", 400);
-                        }
+                    TipoTransaccion.compra => (producto.Stock ?? 0) + (data.Cantidad ?? 0),
+                    TipoTransaccion.venta => (producto.Stock ?? 0) - (data.Cantidad ?? 0),
+                    _ => throw new BaseCustomException("Tipo de transacción no válido", 400),
+                };
+                if (nuevoStock < 0)
+                {
+                    throw new BaseCustomException("Stock insuficiente para realizar la operación", 400);
                 }
+
+                request.Stock = nuevoStock;
+
                 var jsonActualizarProducto = JsonSerializer.Serialize(request);
                 var contentActualizarProducto = new StringContent(jsonActualizarProducto, Encoding.UTF8, "application/json");
                 var resActualizarProducto = await _httpClient.PutAsync($"{urlProducto}/api/Productos?id={data.ProductoId}", contentActualizarProducto);
-                resActualizarProducto.EnsureSuccessStatusCode();
+                var resContent = await resActualizarProducto.Content.ReadAsStringAsync();
+
+                if (!resActualizarProducto.IsSuccessStatusCode)
+                {
+                    var error = JsonSerializer.Deserialize<ErrorResponse>(resContent, _options);
+
+                    if (error == null || error.Code == 404)
+                    {
+                        throw new BaseCustomException($"El producto con id {data.ProductoId} no existe", 404);
+                    }
+
+                    if (error == null || error.Code == 500)
+                    {
+                        throw new BaseCustomException($"Hubo un error al actualizar el stock del producto con id {data.ProductoId}", 500);
+                    }
+
+                    throw new BaseCustomException(error.Message ?? "Error interno al actualizar el producto", error.Code);
+                }
 
                 var newTransaccion = new Transaccione()
                 {
@@ -107,15 +141,41 @@ namespace gestion.transacciones.infraestructure.Repositories
 
                 var devolucion = transaccion.Cantidad;
 
+                int nuevoStock = transaccion.TipoTransaccion.Equals(TipoTransaccion.venta)
+                    ? (transaccion.Producto?.Stock + devolucion ?? 0)
+                    : (transaccion.Producto?.Stock - devolucion ?? 0);
+
+                if (nuevoStock < 0)
+                {
+                    throw new BaseCustomException("Stock insuficiente para realizar la operación", 400);
+                }
+
                 var request = new RequestProductoDto()
                 {
-                    Stock = transaccion.TipoTransaccion.Equals(TipoTransaccion.venta) ? (transaccion.Producto?.Stock + devolucion) : (transaccion.Producto?.Stock - devolucion)
+                    Stock = nuevoStock
                 };
-                var urlProducto = _config.GetConnectionString("producto_service") ?? throw new BaseCustomException("La uri del microservicio de productos no esta configurada",500);
+                var urlProducto = _config.GetConnectionString("producto_service") ?? throw new BaseCustomException("La uri del microservicio de productos no esta configurada", 500);
                 var json = JsonSerializer.Serialize(request);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 var res = await _httpClient.PutAsync($"{urlProducto}/api/Productos?id={transaccion.ProductoId}", content);
-                res.EnsureSuccessStatusCode();  
+                var resContent = await res.Content.ReadAsStringAsync();
+
+                if (!res.IsSuccessStatusCode)
+                {
+                    var error = JsonSerializer.Deserialize<ErrorResponse>(resContent, _options);
+
+                    if (error == null || error.Code == 404)
+                    {
+                        throw new BaseCustomException($"El producto con id {transaccion.ProductoId} no existe", 404);
+                    }
+
+                    if (error == null || error.Code == 500)
+                    {
+                        throw new BaseCustomException($"Hubo un error al actualizar el stock del producto con id {transaccion.ProductoId}", 500);
+                    }
+
+                    throw new BaseCustomException(error.Message ?? "Error interno al actualizar el producto", error.Code);
+                }
 
                 _context.Transacciones.Remove(transaccion);
                 await _context.SaveChangesAsync();
@@ -180,10 +240,14 @@ namespace gestion.transacciones.infraestructure.Repositories
 
                 var diferenciaCantidad = data.Cantidad - transaccion.Cantidad;
 
-                // Realizar actualización del producto en base del tipo de transacción
                 var nuevoStock = transaccion.TipoTransaccion.Equals(TipoTransaccion.compra)
                     ? producto!.Stock + diferenciaCantidad
                     : producto!.Stock - diferenciaCantidad;
+
+                if (nuevoStock < 0)
+                {
+                    throw new BaseCustomException("Stock insuficiente para realizar la operación", 400);
+                }
 
                 var requestProducto = new RequestProductoDto
                 {
@@ -194,7 +258,25 @@ namespace gestion.transacciones.infraestructure.Repositories
                 var contentActualizar = new StringContent(jsonActualizar, Encoding.UTF8, "application/json");
 
                 var resActualizar = await _httpClient.PutAsync($"{urlProducto}/api/Productos?id={transaccion.ProductoId}", contentActualizar);
-                resActualizar.EnsureSuccessStatusCode();
+                var resContent = await resActualizar.Content.ReadAsStringAsync();
+
+                if (!resActualizar.IsSuccessStatusCode)
+                {
+                    var error = JsonSerializer.Deserialize<ErrorResponse>(resContent, _options);
+
+                    if (error == null || error.Code == 404)
+                    {
+                        throw new BaseCustomException($"El producto con id {transaccion.ProductoId} no existe", 404);
+                    }
+
+                    if (error == null || error.Code == 500)
+                    {
+                        throw new BaseCustomException($"Hubo un error al actualizar el stock del producto con id {transaccion.ProductoId}", 500);
+                    }
+
+                    throw new BaseCustomException(error.Message ?? "Error interno al actualizar el producto", error.Code);
+                }
+
                 transaccion.Cantidad = data.Cantidad;
                 transaccion.Detalle = data.Detalle;
                 transaccion.PrecioUnitario = data.PrecioUnitario;

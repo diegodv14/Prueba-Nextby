@@ -29,8 +29,7 @@ namespace gestion.productos.infraestructure.middlewares
                             statusCode = customException.Code;
                             message = customException.Message;
                         }
-
-                        if (exception is Exception Exception)
+                        else if (exception is Exception Exception)
                         {
                             statusCode = 500;
                             message = Exception.Message;

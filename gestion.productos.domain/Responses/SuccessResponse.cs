@@ -5,7 +5,7 @@
         public T? Data { get; set; }
         public string Mensaje { get; set; }
         public int Status { get; set; }
-
+        public SuccessResponse() { }
         public SuccessResponse(T? data, string? message = null, int? code = null)
         {
             Data = data;

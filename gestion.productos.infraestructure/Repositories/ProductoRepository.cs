@@ -108,7 +108,7 @@ namespace gestion.productos.infraestructure.Repositories
 
                 return producto;
             }
-            catch
+            catch(Exception ex)
             {
                 throw;
             }

@@ -1,4 +1,6 @@
-﻿namespace gestion.transacciones.domain.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace gestion.transacciones.domain.Models;
 
 public partial class Producto
 {
@@ -16,5 +18,6 @@ public partial class Producto
 
     public int? Stock { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<Transaccione>? Transacciones { get; set; } = null!;
 }

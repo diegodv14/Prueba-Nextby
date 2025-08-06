@@ -73,7 +73,7 @@ namespace gestion.transacciones.infraestructure.Repositories
                 {
                     "compra" => (producto.Stock ?? 0) + (data.Cantidad ?? 0),
                     "venta" => (producto.Stock ?? 0) - (data.Cantidad ?? 0),
-                    _ => throw new BaseCustomException("Tipo de transacción no válido", 400),
+                    _ => throw new BaseCustomException("Tipo de transacción no válido, solo se permiten compra y venta", 400),
                 };
                 if (nuevoStock < 0)
                 {
@@ -108,6 +108,7 @@ namespace gestion.transacciones.infraestructure.Repositories
                 {
                     TipoTransaccion = tipo,
                     Cantidad = data.Cantidad,
+                    ProductoId = producto.Id,
                     Detalle = data.Detalle,
                     PrecioTotal = data.PrecioTotal,
                     PrecioUnitario = data.PrecioUnitario
@@ -208,6 +209,11 @@ namespace gestion.transacciones.infraestructure.Repositories
                 }
                 if (!string.IsNullOrEmpty(filtros.tipo))
                 {
+                    if(filtros.tipo.ToLower().Trim() != "compra" && filtros.tipo.ToLower().Trim() != "venta")
+                    {
+                        throw new BaseCustomException("Tipo de transacción no válido para filtrar, solo se permiten compra y venta", 400);
+                    }
+
                     query = query.Where(t => t.TipoTransaccion == filtros.tipo);
                 }
                 var transacciones = await query

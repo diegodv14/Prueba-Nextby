@@ -1,4 +1,4 @@
-﻿using gestion.transacciones.domain.Models.Enums;
+﻿using System.Text.Json.Serialization;
 
 namespace gestion.transacciones.domain.Models;
 
@@ -20,5 +20,6 @@ public partial class Transaccione
 
     public string? Detalle { get; set; }
 
+    [JsonIgnore]
     public virtual Producto? Producto { get; set; } = null!;
 }

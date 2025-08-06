@@ -8,7 +8,7 @@ public partial class Transaccione
 
     public DateTime? Fecha { get; set; }
 
-    public TipoTransaccion TipoTransaccion { get; set; }
+    public string? TipoTransaccion { get; set; }
 
     public Guid? ProductoId { get; set; }
 

@@ -5,6 +5,7 @@ using gestion.transacciones.domain.Models;
 using gestion.transacciones.domain.Models.Enums;
 using gestion.transacciones.domain.response;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace gestion.transacciones.api.Controllers
 {
@@ -20,6 +21,10 @@ namespace gestion.transacciones.api.Controllers
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         [ProducesResponseType(typeof(ErrorResponse), 500)]
         [ProducesResponseType(typeof(ErrorResponse), 404)]
+        [SwaggerOperation(
+            Summary = "Listar transacciónes",
+            Description = "El tipoTransaccion debe ser 'compra' o 'venta'."
+        )]
         public async Task<SuccessResponse<List<Transaccione>>> ListarTransacciones([FromQuery] RequestFiltrosTransacciones filtros)
         {
             var res = await _repository.GetTransacciones(filtros);
@@ -33,7 +38,11 @@ namespace gestion.transacciones.api.Controllers
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         [ProducesResponseType(typeof(ErrorResponse), 500)]
         [ProducesResponseType(typeof(ErrorResponse), 404)]
-        public async Task<SuccessResponse<Transaccione>> RegistrarTransaccion([FromRoute] TipoTransaccion tipoTransaccion, [FromBody] RequestTransaccionDto data)
+        [SwaggerOperation(
+            Summary = "Registrar una transacción",
+            Description = "El tipoTransaccion debe ser 'compra' o 'venta'."
+        )]
+        public async Task<SuccessResponse<Transaccione>> RegistrarTransaccion([FromRoute] string tipoTransaccion, [FromBody] RequestTransaccionDto data)
         {
             var res = await _repository.AddTransaccion(tipoTransaccion, data);
             return new SuccessResponse<Transaccione>(res, $"Transacción de {tipoTransaccion} creada exitosamente", 201);

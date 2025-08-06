@@ -1,7 +1,6 @@
 ﻿
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TYPE tipo_transaccion AS ENUM ('compra', 'venta');
 
 CREATE TABLE productos (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -16,7 +15,7 @@ CREATE TABLE productos (
 CREATE TABLE transacciones (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    tipo_transaccion tipo_transaccion NOT NULL,
+    tipo_transaccion TEXT NOT NULL,
     producto_id UUID REFERENCES productos(id),
     cantidad INT,
     precio_unitario NUMERIC(10, 2),

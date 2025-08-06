@@ -10,7 +10,7 @@ public partial class Transaccione
 
     public Guid? ProductoId { get; set; }
 
-    public TipoTransaccion TipoTransaccion { get; set; }
+    public string? TipoTransaccion { get; set; }
 
     public int? Cantidad { get; set; }
 

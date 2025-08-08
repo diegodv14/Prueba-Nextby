@@ -29,7 +29,7 @@ docker-compose up -d
 
 Este comando inicia el contenedor de PostgreSQL y automáticamente ejecuta un archivo `init.sql` que se encuentra en la misma carpeta.
 
-4. Una vez levantada la base de datos, simplemente corre ambos microservicios desde la solución.
+4. Una vez levantada la base de datos, simplemente corre ambos microservicios desde la solución cada uno mediante su servidor .api (Ambos deben levantarse mediante http).
 
 ## Probar los endpoints
 
